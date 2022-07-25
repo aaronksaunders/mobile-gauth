@@ -1,0 +1,14 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "mobile-gauth",
+	"webDir": "dist",
+	"bundledWebRuntime": false,
+	"plugins": {
+		"FirebaseAuthentication": {
+			"skipNativeAuth": true,
+			"providers": [
+				"google.com"
+			]
+		}
+	}
+}

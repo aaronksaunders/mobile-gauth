@@ -1,0 +1,7 @@
+{
+  "name": "mobile-gauth",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
