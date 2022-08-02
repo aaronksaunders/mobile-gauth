@@ -24,21 +24,19 @@ export function useFirebaseService() {
     const initialized = ref(false);
 
 
-    // this never fires on native devices...
-    FirebaseAuthentication.addListener("authStateChange", async (result) => {
+    // this never fires on native devices... so we'll just use the JS version
+    !Capacitor.isNativePlatform() && FirebaseAuthentication.addListener("authStateChange", async (result) => {
         if (result.user) {
             console.log("js user", await getAuth().currentUser);
-            console.log("get the user ", result.user);
         } else {
             console.log("no user found");
         }
         initialized.value = true;
     });
 
+    // initialize the Firebase JS SDK
     const app = initializeApp(firebaseConfig);
     console.log("firebase initialized", app);
-
-
 
     const db = getFirestore(app);
     let auth: any = null;
@@ -47,22 +45,25 @@ export function useFirebaseService() {
         auth = initializeAuth(app, {
             persistence: indexedDBLocalPersistence,
         });
+
+        // this is a hack that works on native devices since the plugin 
+        // doesn't fire the authStateChange event
+        auth.onAuthStateChanged(async (user: any) => {
+            let _user = user;
+            if (!user) {
+                _user = await FirebaseAuthentication.getCurrentUser();
+                console.log("no user found... calling API to get user", _user);
+                initialized.value = true;
+                return;
+            }
+            console.log("user - onAuthStateChanged", user);
+            initialized.value = true;
+        })
     } else {
         auth = getAuth(app);
     }
 
-    // this is a hack that works on native devices...
-    auth.onAuthStateChanged(async (user: any) => {
-        let _user = user;
-        if (!user) {
-            _user = await FirebaseAuthentication.getCurrentUser();
-            console.log("no user found... calling API to get user", _user);
-            initialized.value = true;
-            return;
-        }
-        console.log("user - onAuthStateChanged", user);
-        initialized.value = true;
-    })
+
 
 
     return { app, db, auth, initialized };
