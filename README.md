@@ -36,7 +36,7 @@ and then I just use the JS SDK authListener since it does fire.
         initialized.value = true;
     })
 ```
-I don't start the app completely until I know `authStateChanged` has been called
+I don't start the app completely until I know `authStateChanged` has been called which I can determine by watching the `initialized` flag that I get from my composable/hook
 
 ```
 const { initialized } = useFirebaseService();
