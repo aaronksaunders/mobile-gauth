@@ -1,10 +1,10 @@
-import { createApp } from 'vue'
+import { createApp, watch } from 'vue'
 import App from './App.vue'
 import router from './router';
 
 import { IonicVue } from '@ionic/vue';
 
-import { app as firebaseApp } from './firebase-service';
+import { useFirebaseService } from './firebase-service';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -24,39 +24,22 @@ import '@ionic/vue/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
-import { getAuth } from 'firebase/auth';
 
-console.log(firebaseApp);
+
+const { initialized } = useFirebaseService();
 
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
 
-// check for existing user
-new Promise((resolve) => {
-  FirebaseAuthentication.removeAllListeners().then(() => {
+watch(initialized, (value) => {
 
-    console.log('removed all listeners');
-
-    FirebaseAuthentication.addListener("authStateChange", async (result) => {
-      if (result.user) {
-        console.log("js user", await getAuth().currentUser);
-        console.log(result.user);
-      } else {
-        console.log(null);
-      }
-      resolve(true);
-    });
-
-    console.log('listener added...');
-  });
-}).then(() => {
-
-  console.log('mounting the app...');
+  console.log("initialized", value);
 
   // mount the app
+  console.log('mounting the app...');
   router.isReady().then(() => {
     app.mount('#app');
   });
-});
+})
+

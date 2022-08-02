@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, indexedDBLocalPersistence, initializeAuth } from "firebase/auth";
 import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
+import { ref } from "vue";
 
 console.log(process.env);
 const firebaseConfig = {
@@ -15,17 +16,54 @@ const firebaseConfig = {
     appId: process.env.VUE_APP_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-let auth: any = null;
 
-if (Capacitor.isNativePlatform()) {
-    auth = initializeAuth(app, {
-        persistence: indexedDBLocalPersistence,
+
+
+export function useFirebaseService() {
+
+    const initialized = ref(false);
+
+
+    // this never fires on native devices...
+    FirebaseAuthentication.addListener("authStateChange", async (result) => {
+        if (result.user) {
+            console.log("js user", await getAuth().currentUser);
+            console.log("get the user ", result.user);
+        } else {
+            console.log("no user found");
+        }
+        initialized.value = true;
     });
-} else {
-    auth = getAuth(app);
+
+    const app = initializeApp(firebaseConfig);
+    console.log("firebase initialized", app);
+
+
+
+    const db = getFirestore(app);
+    let auth: any = null;
+
+    if (Capacitor.isNativePlatform()) {
+        auth = initializeAuth(app, {
+            persistence: indexedDBLocalPersistence,
+        });
+    } else {
+        auth = getAuth(app);
+    }
+
+    // this is a hack that works on native devices...
+    auth.onAuthStateChanged(async (user: any) => {
+        let _user = user;
+        if (!user) {
+            _user = await FirebaseAuthentication.getCurrentUser();
+            console.log("no user found... calling API to get user", _user);
+            initialized.value = true;
+            return;
+        }
+        console.log("user - onAuthStateChanged", user);
+        initialized.value = true;
+    })
+
+
+    return { app, db, auth, initialized };
 }
-
-
-export { app, db, auth };
