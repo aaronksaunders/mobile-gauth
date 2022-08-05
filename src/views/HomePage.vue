@@ -82,11 +82,14 @@ import {
   signInWithPhoneNumber as signInWithPhoneNumberWeb,
 } from "@firebase/auth";
 import { Capacitor } from "@capacitor/core";
+import { useFirebaseService } from "@/firebase-service";
 const authResult = ref<any>();
 const email = ref("");
 const password = ref("");
 const phoneNumberRef = ref("");
 const error = ref<any>();
+
+const { testQuery } = useFirebaseService();
 
 onIonViewWillEnter(async () => {
   console.log(getCurrentUser());
@@ -130,6 +133,11 @@ const getCurrentUser = () => {
   const auth = getAuth();
   const user = auth.currentUser;
   authResult.value = user;
+
+  // test query
+  testQuery().then((res) => {
+    console.log(res);
+  });
   return user;
 };
 

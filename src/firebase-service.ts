@@ -1,9 +1,11 @@
 import { Capacitor } from "@capacitor/core";
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getDocs, getFirestore, query, where } from "firebase/firestore";
 import { getAuth, indexedDBLocalPersistence, initializeAuth } from "firebase/auth";
 import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 import { ref } from "vue";
+
+import { collection, doc, setDoc } from "firebase/firestore";
 
 console.log(process.env);
 const firebaseConfig = {
@@ -64,7 +66,26 @@ export function useFirebaseService() {
     }
 
 
+    /**
+     * 
+     * @returns verify I can actually query the database
+     */
+    const testQuery = async () => {
 
 
-    return { app, db, auth, initialized };
+        const q = query(collection(db, "links"));
+
+        const querySnapshot = await getDocs(q);
+        const response: any[] = [];
+        querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            console.log(doc.id, " => ", doc.data());
+            response.push({ ...doc.data(), id: doc.id });
+        });
+
+        return response;
+    }
+
+
+    return { app, db, auth, initialized, testQuery };
 }
