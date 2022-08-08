@@ -1,5 +1,7 @@
 # mobile-gauth
 
+A sample app showing how to integrate the [ Capacitor Firebase Authentication Plugin from CapAwesome Team](https://github.com/capawesome-team/capacitor-firebase) in an Ionic React Application
+
 you will need to add to root of project a .env file to project 
 ```
   VUE_APP_FIREBASE_API_KEY= 
