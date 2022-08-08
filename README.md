@@ -1,6 +1,6 @@
-# mobile-gauth
+# Capacitor Firebase Authentication Plugin from CapAwesome Team - Example Vue JS App
 
-A sample app showing how to integrate the [ Capacitor Firebase Authentication Plugin from CapAwesome Team](https://github.com/capawesome-team/capacitor-firebase) in an Ionic React Application
+A sample app showing how to integrate the [ Capacitor Firebase Authentication Plugin from CapAwesome Team](https://github.com/capawesome-team/capacitor-firebase) in an Ionic VueJS Application
 
 you will need to add to root of project a .env file to project 
 ```
