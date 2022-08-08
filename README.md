@@ -58,4 +58,4 @@ watch(initialized, (value) => {
 
 
 See video
-https://www.loom.com/share/b6b33bd9838a4af3a26d6b29595c8e0b
+https://youtu.be/64N1dIjljZo
