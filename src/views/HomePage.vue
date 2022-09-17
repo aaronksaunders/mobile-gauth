@@ -9,14 +9,6 @@
     <ion-content :fullscreen="true">
       <ion-button @click="signInWithGoogle">GOOGLE AUTH</ion-button>
       <ion-button @click="signInWithTwitter">TWITTER AUTH</ion-button>
-
-      <template v-if="authResult">
-        <div>
-          <ion-button @click="signOut">SIGN OUT</ion-button>
-          <pre>{{ authResult }}</pre>
-        </div>
-      </template>
-      <template v-else>
         <div>
           {{ JSON.stringify(error) }}
         </div>
@@ -49,7 +41,6 @@
             </ion-card-content>
           </ion-card>
         </div>
-      </template>
     </ion-content>
   </ion-page>
 </template>
@@ -70,7 +61,7 @@ import {
   IonCardContent,
 } from "@ionic/vue";
 import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import {
   GoogleAuthProvider,
   getAuth,
@@ -82,18 +73,21 @@ import {
   signInWithPhoneNumber as signInWithPhoneNumberWeb,
 } from "@firebase/auth";
 import { Capacitor } from "@capacitor/core";
-import { useFirebaseService } from "@/firebase-service";
+import { currentUser, getUser, setCurrentUser } from "@/firebase-service";
+import { useRouter } from "vue-router";
 const authResult = ref<any>();
 const email = ref("");
 const password = ref("");
 const phoneNumberRef = ref("");
 const error = ref<any>();
+const router = useRouter();
 
-const { testQuery } = useFirebaseService();
+const displayUser = computed(() => authResult?.value);
 
 onIonViewWillEnter(async () => {
-  console.log(getCurrentUser());
+  console.log("onIonViewWillEnter", currentUser);
 });
+
 
 onMounted(() => {
   if (!Capacitor.isNativePlatform()) {
@@ -110,6 +104,14 @@ onMounted(() => {
       },
       getAuth()
     );
+  }
+
+  console.log("onMounted", currentUser);
+});
+
+watch(currentUser, () => {
+  if (currentUser?.value?.email) {
+    router.replace("/private");
   }
 });
 
@@ -129,60 +131,58 @@ const signOut = async () => {
   authResult.value = null;
 };
 
-const getCurrentUser = () => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  authResult.value = user;
+/**
+ * gets the current user from the javascript api to ensure
+ * we can make database calls as an authenticated user
+ */
+const getCurrentUser = async () => {
+  authResult.value = currentUser;
 
-  // test query
-  testQuery().then((res) => {
-    console.log(res);
-  });
-  return user;
+  // test query, to validate we are authenticated
+  // testQuery().then((res) => {
+  //   console.log(res);
+  // });
+  return authResult.value;
 };
 
 /**
- * 
+ *
  *  WORKING !!
- * 
+ *
  *  @description sign in with email and password
  */
 const signIn = async () => {
   try {
-    const result = await FirebaseAuthentication.signInWithEmailAndPassword({
+    await FirebaseAuthentication.signInWithEmailAndPassword({
       email: email.value,
       password: password.value,
     });
 
-    console.log(result);
+    const userCredential = await signInWithEmailAndPassword(getAuth(), email.value, password.value);
 
-    const auth = getAuth();
-    await signInWithEmailAndPassword(auth, email.value, password.value);
-
-    return getCurrentUser();
+    return setCurrentUser(userCredential?.user);
   } catch (_error) {
     console.log(_error);
     error.value = _error;
   }
 };
 /**
- * 
+ *
  *  WORKING !!
- * 
+ *
  *  @description Sign in with Google.
  */
 const signInWithGoogle = async () => {
   const result = await FirebaseAuthentication.signInWithGoogle();
 
   const credential = GoogleAuthProvider.credential(result.credential?.idToken);
-  const auth = getAuth();
-  await signInWithCredential(auth, credential);
+  const userCredential = await signInWithCredential(getAuth(), credential);
 
-  return getCurrentUser();
+  return setCurrentUser(userCredential?.user);
 };
 
 /**
- * 
+ *
  * @description Sign in with Twitter.
  */
 const signInWithTwitter = async () => {
@@ -193,10 +193,9 @@ const signInWithTwitter = async () => {
       result.credential?.idToken as string,
       result.credential?.secret as string
     );
-    const auth = getAuth();
-    await signInWithCredential(auth, credential);
+    const userCredential = await signInWithCredential(getAuth(), credential);
 
-    return getCurrentUser();
+    return setCurrentUser(userCredential?.user);
   } catch (_error: any) {
     console.log(_error);
     error.value = _error?.message;
@@ -204,9 +203,9 @@ const signInWithTwitter = async () => {
 };
 
 /**
- * 
+ *
  *  WORKING !!
- * 
+ *
  * @description Sign in with phone number, first check and if on the web, then
  *  sign in with web version of this call. @see signInWithPhoneNumber_web
  */
@@ -233,20 +232,19 @@ const signInWithPhoneNumber = async () => {
       verificationCode || ""
     );
 
-    const auth = getAuth();
-    await signInWithCredential(auth, credential as any);
-    return getCurrentUser();
+    const userCredential = await signInWithCredential(getAuth(), credential as any);
+    return setCurrentUser(userCredential?.user);
+
   } catch (_error: any) {
     console.log(_error);
     error.value = _error.message;
   }
 };
 
-
 /**
- * 
+ *
  *  WORKING !!
- * 
+ *
  * @description sign in with phone number on the Web
  */
 const signInWithPhoneNumber_web = async () => {
