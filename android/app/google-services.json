@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "889629464680",
+    "firebase_url": "https://heligram-276fe-default-rtdb.firebaseio.com",
+    "project_id": "heligram-276fe",
+    "storage_bucket": "heligram-276fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889629464680:android:c216e07db23ffc89fc83dd",
+        "android_client_info": {
+          "package_name": "io.ionic.starter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "889629464680-lhampnakch76ljhvl9ubgs5sjtlqndcj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADMZNvo3mtVpTRvNtP8ORUzzYG7fx7r-g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "889629464680-lhampnakch76ljhvl9ubgs5sjtlqndcj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "889629464680-n98scog5n9l2n98e4nkdcc1f5llvrh6q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.heligram.mobile"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
