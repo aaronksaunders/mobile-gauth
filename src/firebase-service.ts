@@ -53,11 +53,11 @@ export const testQuery = async () => {
 };
 
 /**
- * 
+ *
  * user by social media auth functions to set user after credential login
- * 
- * @param user 
- * @returns 
+ *
+ * @param user
+ * @returns
  */
 export const setCurrentUser = (user: any) => {
   console.log("set current user", user);
@@ -66,34 +66,58 @@ export const setCurrentUser = (user: any) => {
 };
 
 /**
- * 
+ *
  * called in main.ts to initialize firebase auth and check for a user.
- * 
- * @returns 
+ *
+ * @returns
  */
 export const initializeFBAuth = () => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async function (resolve) {
+    // set user using js sdk auth state change user, we need to ensure
+    // this user is logged in since we plan on using the database
+    getAuth().onAuthStateChanged(async (user) => {
+      USER.value = getAuth().currentUser;
+      console.log("JS USER", getAuth().currentUser);
+
+      if (!(await FirebaseAuthentication.getCurrentUser())) {
+        console.log("Error - we have js user, but no native user logged in");
+      }
+    });
+
+    // check to see if there is a native user alread...
     const { user } = await FirebaseAuthentication.getCurrentUser();
     if (user) {
-      USER.value = user;
+      // if there is a native user then we have to try and load js-sdk user
+      console.log("already have a user, no need to listen");
+      console.log("NATIVE USER", user);
+
+      if (!getAuth().currentUser) {
+        console.log("Error - we have native user, but no js user logged in");
+        USER.value = null;
+        return resolve(null);
+      }
+
+      // set user using js sdk user
+      USER.value = getAuth().currentUser;
 
       // return reactive user from computed
       resolve(currentUser);
       return;
     }
 
-    await FirebaseAuthentication.addListener(
-      "authStateChange",
-      (listenerResponse) => {
+    // This listener will not fire on logout when on native device. you will need
+    // to clear out the user object you are tracking yourself
+    //
+    // also this listener will not reload the js sdk user when running on native
+    // device, you need to do that yourself
+    await FirebaseAuthentication.addListener("authStateChange", (_) => {
+      // set user using js sdk user
+      USER.value = getAuth().currentUser;
+      console.log("listenerResponse", getAuth().currentUser);
 
-        USER.value = listenerResponse?.user;
-
-        console.log("listenerResponse", currentUser);
-
-        // return reactive user from computed
-        resolve(currentUser);
-      }
-    );
+      // return reactive user from computed
+      resolve(currentUser);
+    });
   });
 };
