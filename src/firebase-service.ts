@@ -81,19 +81,22 @@ export const initializeFBAuth = () => {
       console.log("JS USER", getAuth().currentUser);
 
       if (!(await FirebaseAuthentication.getCurrentUser())) {
-        console.log("Error - we have js user, but no native user logged in");
+        console.error("Error - we have js user, but no native user logged in");
+        USER.value = null;
+        return resolve(null);
       }
+      resolve(currentUser);
     });
 
     // check to see if there is a native user alread...
     const { user } = await FirebaseAuthentication.getCurrentUser();
-    if (user) {
+    if (user && getAuth().currentUser) {
       // if there is a native user then we have to try and load js-sdk user
       console.log("already have a user, no need to listen");
       console.log("NATIVE USER", user);
 
       if (!getAuth().currentUser) {
-        console.log("Error - we have native user, but no js user logged in");
+        console.error("Error - we have native user, but no js user logged in");
         USER.value = null;
         return resolve(null);
       }
