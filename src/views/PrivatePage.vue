@@ -7,7 +7,7 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <template v-if="currentUser?.email">
+      <template v-if="currentUser?.uid">
         <div>
           <ion-button @click="signOut">SIGN OUT</ion-button>
           <pre>{{ currentUser }}</pre>
@@ -27,12 +27,8 @@ import {
   IonButton,
   onIonViewWillEnter,
 } from "@ionic/vue";
-import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 import { onMounted } from "vue";
-import {
-  getAuth,
-} from "@firebase/auth";
-import { currentUser, setCurrentUser } from "@/firebase-service";
+import { currentUser, fb_signOut } from "@/firebase-service";
 import { useRouter } from "vue-router";
 const router = useRouter();
 
@@ -51,15 +47,7 @@ onMounted(() => {
  * @description sign out of firebase
  */
 const signOut = async () => {
-  const auth = getAuth();
-
-  // sign out web
-  await auth.signOut();
-
-  // sign out capacitor
-  await FirebaseAuthentication.signOut();
-
-  setCurrentUser(null);
+  await fb_signOut()
 
   // clear authResult
   router.replace("/home")

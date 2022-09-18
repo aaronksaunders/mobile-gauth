@@ -5,7 +5,7 @@ import HomePage from "@/views/HomePage.vue";
 import PrivatePage from "@/views/PrivatePage.vue";
 
 const guard = async (to: any, from: any, next: any) => {
-  const loggedIn = currentUser?.value?.email ? true : false;
+  const loggedIn = currentUser?.value?.uid ? true : false;
   if (loggedIn && ["home", "index"].includes(to.name)) {
     return next({ name: "private-page" });
   } else if (!loggedIn && ["home", "index"].includes(to.name)) {
